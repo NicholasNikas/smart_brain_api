@@ -2,9 +2,7 @@ const sha256 = require('js-sha256');
 
 const handleRegister = (req, res, db) => {
   const { email, name, password } = req.body;
-  console.log(password);
   const hash = sha256(password);
-  console.log(hash);
   db.transaction(trx => {
     // create transaction
     trx
