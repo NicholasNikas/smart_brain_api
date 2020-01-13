@@ -10,10 +10,6 @@ const handleSignin = (req, res, db) => {
     .where('email', '=', email)
     .then(data => {
       const hashedPassEntered = sha256(password);
-      console.log(-1, password);
-      console.log(-1, data[0].hash);
-      console.log(1, hashedPassEntered);
-      console.log(2, hashedPassEntered == data[0].hash);
       if (hashedPassEntered == data[0].hash) {
         return db
           .select('*')
