@@ -1,2 +1,2 @@
 # smart_brain_api
-YEEEEEEE SMART BRAIN
+The backend server for Smart Brain
