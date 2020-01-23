@@ -1,19 +1,22 @@
-const sha256 = require('js-sha256');
-
-const handleRegister = (req, res, db) => {
+const handleRegister = async (req, res, db, bcrypt) => {
   const { email, name, password } = req.body;
-  const hash = sha256(password);
+  if (!email || !name || !password) {
+    return res.status(400).json('incorrect form submission');
+  }
+  // Encrypt password
+  const salt = await bcrypt.genSalt(10);
+  hash = await bcrypt.hash(password, salt);
+
   db.transaction(trx => {
-    // create transaction
     trx
       .insert({
         hash: hash,
         email: email
       })
-      .into('login') // insert hash and email into login table
-      .returning('email') // return email
+      .into('login')
+      .returning('email')
       .then(loginEmail => {
-        return trx('users') // then using loginEmail return another trx transaction to insert into users
+        return trx('users')
           .returning('*')
           .insert({
             email: loginEmail[0],
@@ -21,15 +24,14 @@ const handleRegister = (req, res, db) => {
             joined: new Date()
           })
           .then(user => {
-            // respond with json
             res.json(user[0]);
           });
       })
-      .then(trx.commit) // must commit trx to add it
-      .catch(trx.rollback); // catch error
+      .then(trx.commit)
+      .catch(trx.rollback);
   }).catch(err => res.status(400).json('unable to register'));
 };
 
 module.exports = {
-  handleRegister
+  handleRegister: handleRegister
 };

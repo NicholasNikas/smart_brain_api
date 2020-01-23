@@ -1,6 +1,6 @@
-const sha256 = require('js-sha256');
+const bcrypt = require('bcryptjs');
 
-const handleSignin = (req, res, db) => {
+const handleSignin = async (req, res, db) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json('incorrect form submission');
@@ -8,9 +8,11 @@ const handleSignin = (req, res, db) => {
   db.select('email', 'hash')
     .from('login')
     .where('email', '=', email)
-    .then(data => {
-      const hashedPassEntered = sha256(password);
-      if (hashedPassEntered == data[0].hash) {
+    .then(async data => {
+      // check if password is correct
+      const isMatch = await bcrypt.compare(password, data[0].hash);
+
+      if (isMatch) {
         return db
           .select('*')
           .from('users')
